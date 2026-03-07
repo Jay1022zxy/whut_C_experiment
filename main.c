@@ -158,16 +158,17 @@ void search_Card()
     {
         if (cards[i].cardID == cardID)
         {
-            printf("卡号: %d\n", cards[i].cardID);
-            printf("状态: %s\n", cards[i].isActive ? "激活" : "未激活");
-            printf("余额: %.2lf RMB\n", cards[i].money);
-            printf("累计使用: %.2lf RMB\n", cards[i].money - cards[i].money); // 这里需要根据实际使用情况计算
-            printf("使用次数: %d次\n", cards[i].use_count);
-            if(cards[i].last_date[0] != '\0')
-                printf("最后使用时间: %s\n", cards[i].last_date);
+            printf("----------查询结果----------\n");
+            printf("卡号: %d\t", cards[i].cardID);                             // 卡号
+            printf("状态: %s\t", cards[i].isActive ? "激活" : "未激活");       // 状态
+            printf("余额: %.2lf RMB\t", cards[i].money);                      // 余额
+            printf("消费金额: %.2lf RMB\t", cards[i].money - cards[i].money); // 消费金额（初始为0）
+            printf("使用次数: %d次\t", cards[i].use_count);                    // 使用次数
+            if(cards[i].last_date[0] != '\0')                                 // 上次使用日期
+                printf("上次使用日期: %s\n", cards[i].last_date);
             else
-                printf("最后使用时间: 暂无记录\n");
-            
+                printf("上次使用日期: 暂无记录\n");
+
             system("pause");
             system("cls");
             return;
