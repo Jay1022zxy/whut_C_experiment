@@ -39,25 +39,19 @@ int main()
             off_computer();
         break;
         case 5:
-        {   printf("-----------充值-----------\n");
-            // 充值的代码 charge();
-            break;
-        }
-        case 6:
-        {   printf("-----------退费-----------\n");
-            // 退费的代码 refund();
-            break;
-        }
+            charge();
+        break;
+        case 6: 
+            refund();
+        break;
         case 7:
         {   printf("-----------查询统计-----------\n");
             // 查询统计的代码 statistics();
             break;
         }
         case 8:
-        {   printf("-----------注销卡-----------\n");
-            // 注销卡的代码 cancel_Card();
-            break;
-        }
+            cancel_card();
+        break;
         case 0:
         {   printf("退出系统\n");
             return 0;

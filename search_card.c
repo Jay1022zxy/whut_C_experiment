@@ -27,16 +27,31 @@ void search_card()
                 printf("| 卡号   | 状态   | 余额       | 累计使用   | 使用次数   | 上次使用时间         |\n");
                 printf("+--------+--------+------------+------------+------------+----------------------+\n");
             }
-
-            printf("| %-6s | %-8s | %-10.2lf | %-10.2lf | %-10d | %-20s |\n",  //保持表格对齐
+            
+            // 如果暂未使用，则显示"暂无记录"
+            if (cards[i].last_time[0] == '\0') 
+            {
+            
+            printf("| %-6s | %-8s | %-10.2lf | %-10.2lf | %-10d | %-24s |\n",  //保持表格对齐
                    cards[i].cardID,
                    cards[i].state == 1 ? "正常" : cards[i].state == 2 ? "上机" : "注销",
                    cards[i].money,
                    cards[i].used_money,
                    cards[i].use_count,
-                   cards[i].last_time[0] ? cards[i].last_time : "暂 无 记 录"); // 如果last_time为空，则显示"暂无记录"
-
-            count0++; 
+                   "暂 无 记 录"); // 如果last_time为空，则显示"暂无记录"
+            count0++; // 统计查询到的卡片数量
+            }
+            else
+            {
+                printf("| %-6s | %-8s | %-10.2lf | %-10.2lf | %-10d | %-20s |\n",  //保持表格对齐
+                   cards[i].cardID,
+                   cards[i].state == 1 ? "正常" : cards[i].state == 2 ? "上机" : "注销",
+                   cards[i].money,
+                   cards[i].used_money,
+                   cards[i].use_count,
+                   cards[i].last_time); // 显示上次使用时间
+            count0++; // 统计查询到的卡片数量
+            }
         }
     }
 
@@ -48,7 +63,7 @@ void search_card()
     {
         printf("未查询到该卡！\n");
     }
-
+ 
     system("pause");
     system("cls");
 }

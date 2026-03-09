@@ -16,7 +16,7 @@ void on_computer()
     {
         if (strcmp(cards[i].cardID, cardID) == 0)
         {
-            if (cards[i].state != 1)  // state为1表示正常状态
+            if (cards[i].state == 0)  // state为0表示未激活状态
             {
                 printf("该卡未激活，无法上机！\n");
                 system("pause");
@@ -32,7 +32,7 @@ void on_computer()
             }
             if (cards[i].state == 2) // state为2表示上机状态
             {
-                printf("该卡已在使用中！\n");
+                printf("该卡已上机！\n");
                 system("pause");
                 system("cls");
                 return;
