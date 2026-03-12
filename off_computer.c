@@ -2,8 +2,10 @@
 #include <string.h>
 #include <windows.h>
 #define MAX 1000
-
+#include "billing.h"
 #include "card.h"  
+#include "computer.h"
+#include "record.h"
 
 void off_computer()
 {
@@ -45,29 +47,45 @@ void off_computer()
                 {
                     //记录上机时间
                     char time_last[20];
-                    strcpy(time_last, cards[i].last_time); 
+                    strcpy(time_last, logins[i].login_time); 
 
                     // 记录下机时间
                     SYSTEMTIME st;       // 获取系统时间
                     GetLocalTime(&st);   // 获取当前系统时间
-                    sprintf(cards[i].last_time, "%04d-%02d-%02d %02d:%02d:%02d",
+                    sprintf(settles[i].settle_time, "%04d-%02d-%02d %02d:%02d:%02d",
                     st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
                     double session_time = (st.wHour - atoi(time_last + 11)) * 3600 + 
                                   (st.wMinute - atoi(time_last + 14)) * 60 + 
                                   (st.wSecond - atoi(time_last + 17)); // 计算上机时长，单位为秒
 
-                    cards[i].used_money += session_time * 0.01; // 假设每秒钟收费0.01元 
+                    billings[i].amount_money += session_time * 0.01; // 假设每秒钟收费0.01元 
                     // 对花费进行四舍五入，保留两位小数
-                    cards[i].used_money = (int)(cards[i].used_money * 100 + 0.5) / 100.0;
+                    billings[i].amount_money = (int)(billings[i].amount_money * 100 + 0.5) / 100.0;
 
                     cards[i].money -= session_time * 0.01;      // 从余额中扣除费用
                     // 对余额进行四舍五入，保留两位小数
                     cards[i].money = (int)(cards[i].money * 100 + 0.5) / 100.0;
 
+                    billings[i].nStatus = 1; // 设置消费状态为已结算
+
+                    // 存进消费记录
+                    if ( recordCount < MAX_RECORDS)
+                    {
+                        strcpy(records[recordCount].cardID, cards[i].cardID);
+                        records[recordCount].amount = session_time * 0.01; // 本次消费金额
+                        sscanf(settles[i].settle_time, "%4d-%2d-%2d %2d:%2d:%2d",    // 用sscanf从下机时间字符串中解析出年、月、日、时、分、秒
+                               &records[recordCount].year, &records[recordCount].month, &records[recordCount].day, 
+                               &records[recordCount].hour, &records[recordCount].minute, &records[recordCount].second); // 记录消费日期
+                        
+                        recordCount++; // 增加记录数量
+
+                    }
+
                     if (cards[i].money < 0)  // 余额不足，无法下机
                     {
                         printf("余额不足，请充值！\n");
-                        cards[i].last_time[0] = '\0';  // 清空下机时间
+                        billings[i].nStatus = 0; // 设置消费状态为未结算
+                        settles[i].settle_time[0] = '\0';  // 清空下机时间
                         system("pause");
                         system("cls");
                         return;
@@ -80,8 +98,8 @@ void off_computer()
                     printf("| 卡号   | 消费   | 余额       | 上机时间             | 下机时间             |\n");
                     printf("+--------+--------+------------+----------------------+----------------------+\n");
                     printf("| %-6s | %-6.2f | %-10.2f | %-20s | %-20s |\n", 
-                        cards[i].cardID, cards[i].used_money, cards[i].money, 
-                        time_last, cards[i].last_time);
+                        cards[i].cardID, billings[i].amount_money, cards[i].money, 
+                        time_last, settles[i].settle_time);
                     printf("+--------+--------+------------+----------------------+----------------------+\n");
                     system("pause");
                     system("cls");            

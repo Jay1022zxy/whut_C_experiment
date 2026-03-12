@@ -2,8 +2,9 @@
 #include <string.h>
 #include <windows.h>
 #define MAX 1000
-
+#include "billing.h"
 #include "card.h"  
+#include "record.h"
 
 void add_card()
 {   
@@ -20,7 +21,7 @@ void add_card()
             continue; 
         }
 
-        if (strcmp(cards[count].cardID, "00000") == 0)
+        if (strlen(cards[count].cardID) != 5 ) //限制卡号必须为5位
         {
             printf("卡号格式错误，请重新输入！\n");
             continue;
@@ -34,7 +35,6 @@ void add_card()
                 break;
             }
         }
-
         if (duplicate)
         {
             printf("卡号已存在，请重新输入！\n");
@@ -46,15 +46,16 @@ void add_card()
     while (1)
     {
         int hasLetter = 0, hasDigit = 0;
-        printf("请输入密码: \n");
-        if (scanf("%49s", cards[count].code) != 1)
+        printf("请输入密码(字母和数字组合且最多为20个字符): \n");
+        scanf("%s", cards[count].code);
+
+        if (strlen(cards[count].code) > 20)   // 密码长度限制
         {
-            printf("密码输入失败，请重新输入！\n");
-            while (getchar() != '\n');  // 清除非法输入
+            printf("密码长度超过20个字符，请重新输入！\n");
             continue;
         }
 
-        for (int i = 0; cards[count].code[i] != '\0'; i++)
+        for (int i = 0; cards[count].code[i] != '\0'; i++)   // 检查密码中是否包含字母和数字
         {
             if ((cards[count].code[i] >= 'a' && cards[count].code[i] <= 'z') ||
                 (cards[count].code[i] >= 'A' && cards[count].code[i] <= 'Z'))
@@ -67,12 +68,11 @@ void add_card()
             }
         }
 
-        if (!(hasLetter && hasDigit))
+        if ((hasLetter == 0 || hasDigit == 0)) 
         {
             printf("密码必须包含字母和数字的组合，请重新输入！\n");
             continue;
         }
-
         break;
     }
 
@@ -100,13 +100,22 @@ void add_card()
     cards[count].used_money = 0;
     cards[count].last_time[0] = '\0'; // 初始化为空字符串
 
+    billings[count].nStatus = 1; // 初始化消费状态为已结算
+
+    records[count].amount = 0; // 初始化消费金额为0
+
     count++;
-    printf("添加卡信息成功！\n");
-    // 输出刚才添加的卡的信息
-    printf("卡号: %s\n", cards[count - 1].cardID);
-    printf("密码: %s\n", cards[count - 1].code);
-    printf("状态: %s\n", cards[count - 1].state == 1 ? "正常" : "未激活");
-    printf("余额: %.2lf RMB\n", cards[count - 1].money);    
+    
+    printf("---------添加卡信息成功！---------\n");
+
+    printf("+--------+------------------+---------------+------------+\n");
+    printf("| 卡号   | 密码             |  余 额        | 状态       |\n");
+    printf("+--------+------------------+---------------+------------+\n");
+
+    printf("| %-6s | %-16s | %-10.2fRMB | %-13s |\n",
+         cards[count - 1].cardID,  cards[count - 1].code, cards[count - 1].money, "已 激 活");
+    printf("+--------+------------------+---------------+------------+\n");
+
     system("pause");
     system("cls");
 }

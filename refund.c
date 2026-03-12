@@ -3,6 +3,7 @@
 #include <windows.h>
 #define MAX 1000
 #include "card.h"  
+#include "billing.h"
 
 void refund()
 {
@@ -24,6 +25,13 @@ void refund()
             if (cards[i].state == 2) // state为2表示上机状态
             {
                 printf("该卡正在使用中，无法退款！\n");
+                system("pause");
+                system("cls");
+                return;
+            }
+            if (billings[i].nStatus == 0) // nStatus为0表示未结算状态
+            {
+                printf("该卡有未结算的消费，无法退款！\n");
                 system("pause");
                 system("cls");
                 return;

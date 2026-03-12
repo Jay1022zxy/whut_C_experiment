@@ -2,10 +2,11 @@
 #include <windows.h>
 #include <string.h>
 #define MAX 1000
+#include "billing.h"
+#include "computer.h"
+#include "card.h"  
 
-#include "card.h"  // 02查询卡的函数实现
-
-// 2. 查询卡函数(strstr函数实现模糊查询)
+// 查询卡函数(strstr函数实现模糊查询)
 void search_card()
 {
     printf("-----------查询卡-----------\n");

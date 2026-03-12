@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
+#include <time.h>
 #include "card.h"  
+#include "billing.h"
+#include "computer.h"
 #define MAX 1000
 extern int count;        // 声明全局变量count，表示卡片数量
 
@@ -57,17 +60,22 @@ void on_computer()
                 printf("上机成功！\n");
                 cards[i].use_count++; // 增加使用次数
                 cards[i].state = 2;   // 更新状态为上机中
+
+                billings[i].nStatus = 0; // 设置消费状态为未结算
+
                 // 记录上机时间
                 SYSTEMTIME st;       // 获取系统时间
                 GetLocalTime(&st);   // 获取当前系统时间
 
-                sprintf(cards[i].last_time, "%04d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, 
+                sprintf(logins[i].login_time, "%04d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, 
                         st.wDay, st.wHour, st.wMinute, st.wSecond); // 记录上机时间
                 
-                printf("--------------上机成功---------------\n");
-                printf("卡号: %s\n", cards[i].cardID);
-                printf("余额: %.2f\n", cards[i].money);
-                printf("上机时间: %s\n", cards[i].last_time);
+                printf("------------- 上机信息如下------------\n");
+                printf("+--------+---------------+----------------------+\n");
+                printf("| 卡号   | 余额          | 上机时间             |\n");
+                printf("+--------+---------------+----------------------+\n");
+                printf("| %-6s | %-10.2fRMB | %-20s |\n", cards[i].cardID, cards[i].money, logins[i].login_time);
+                printf("+--------+---------------+----------------------+\n");
 
                 system("pause");
                 system("cls");
