@@ -37,7 +37,7 @@ void search_card()
                    cards[i].cardID,
                    cards[i].state == 1 ? "正常" : cards[i].state == 2 ? "上机" : "注销",
                    cards[i].money,
-                   cards[i].used_money,
+                   billings[i].amount_money,     // 累计使用金额
                    cards[i].use_count,
                    "暂 无 记 录"); // 如果last_time为空，则显示"暂无记录"
             count0++; // 统计查询到的卡片数量
@@ -48,7 +48,7 @@ void search_card()
                    cards[i].cardID,
                    cards[i].state == 1 ? "正常" : cards[i].state == 2 ? "上机" : "注销",
                    cards[i].money,
-                   cards[i].used_money,
+                   billings[i].amount_money,     // 累计使用金额
                    cards[i].use_count,
                    cards[i].last_time); // 显示上次使用时间
             count0++; // 统计查询到的卡片数量

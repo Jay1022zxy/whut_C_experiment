@@ -24,7 +24,7 @@ void search_card_records()
     printf("请输入卡号(5位数字): ");
     scanf("%5s", cardID);
     
-    if (strcmp(cardID, "00000") == 0)
+    if (strlen(cardID) != 5 )        // 验证卡号长度是否为5位
     {
         printf("卡号格式错误，请重新输入！\n");
         return;
@@ -61,7 +61,7 @@ void search_card_records()
     printf("请输入结束日期(格式: 年 月 日,以空格分隔): ");
     scanf("%d %d %d", &end_year, &end_month, &end_day);
     
-    int start = date_to_int(year, month, day);
+    int start = date_to_int(year, month, day);        
     int end = date_to_int(end_year, end_month, end_day);
 
     int found = 0;    // 标记是否找到记录
@@ -73,7 +73,7 @@ void search_card_records()
         // 从 login_time 里提取 年月日
         sscanf(logins[i].login_time, "%d-%d-%d", &log_year, &log_month, &log_day);
 
-        int cur = date_to_int(log_year, log_month, log_day);
+        int cur = date_to_int(log_year, log_month, log_day);    // 将登录时间转换为整数进行比较
 
         if (cur >= start && cur <= end)
         {
@@ -103,7 +103,6 @@ void search_card_records()
 
         system("pause");
         system("cls");
-
     }
 }
 
@@ -129,7 +128,7 @@ void search_merchant_turnover_period()
 
     for (int i = 0; i < recordCount; i++)
     {
-        int cur = date_to_int(records[i].year, records[i].month, records[i].day);
+        int cur = date_to_int(records[i].year, records[i].month, records[i].day);  // 将记录的日期转换为整数进行比较
 
         if (cur >= start && cur <= end)
         {
@@ -137,7 +136,7 @@ void search_merchant_turnover_period()
         }
     }
 
-    printf("在 %04d-%02d-%02d 到 %04d-%02d-%02d 期间的营业额为：%.2f\n",
+    printf("在 %04d-%02d-%02d 到 %04d-%02d-%02d 期间的营业额为：%.2f元\n",
            sy, sm, sd, ey, em, ed, total);
 
     system("pause");
@@ -166,7 +165,7 @@ void search_merchant_turnover_year()
     printf("\n在 %d 年每个月的营业额如下：\n", year);
     for (int i = 0; i < 12; i++)
     {
-        printf("%2d 月：%.2f\n", i + 1, monthTotal[i]);
+        printf("%2d 月：%.2f元\n", i + 1, monthTotal[i]);
     }
 
     system("pause");

@@ -70,6 +70,8 @@ void on_computer()
                 sprintf(logins[i].login_time, "%04d-%02d-%02d %02d:%02d:%02d", st.wYear, st.wMonth, 
                         st.wDay, st.wHour, st.wMinute, st.wSecond); // 记录上机时间
                 
+                strcpy(cards[i].last_time, logins[i].login_time);   // 更新卡片的上次使用时间
+                
                 printf("------------- 上机信息如下------------\n");
                 printf("+--------+---------------+----------------------+\n");
                 printf("| 卡号   | 余额          | 上机时间             |\n");

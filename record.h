@@ -15,11 +15,11 @@ typedef struct
     int second;
 } Record;
 
-extern int count;
+extern int count;                      // 声明全局变量count，表示卡片数量
 
-Record records[MAX_RECORDS]; // 定义一个全局数组来存储消费记录
-extern Record records[MAX_RECORDS]; // 定义一个全局数组来存储消费记录
+Record records[MAX_RECORDS];           // 定义一个全局数组来存储消费记录
+extern Record records[MAX_RECORDS];    // 定义一个全局数组来存储消费记录
 
-extern int recordCount; // 定义一个全局变量来跟踪当前记录数量
+extern int recordCount;                // 声明全局变量recordCount，用于跟踪当前记录数量
 
 #endif

@@ -3,7 +3,10 @@
 #include <string.h>
 #include <time.h>  
 #define MAX 1000
-#include "card.h"     
+#include "card.h"
+#include "billing.h"
+#include "record.h"
+#include "computer.h"     
 
 int count = 0; // 卡片数量
 int recordCount = 0; // 消费记录数量
@@ -51,7 +54,7 @@ int main()
             charge();
         break;
         case '6': 
-            refund();
+            refund(); 
         break;
         case '7':
             statistics();

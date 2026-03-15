@@ -24,6 +24,8 @@ void search_card();    // 查询卡函数声明
 void on_computer();    // 上机函数声明
 void off_computer();   // 下机函数声明
 void charge();         // 充值函数声明
+void refund();         // 退款函数声明
+void statistics();      // 统计查询函数声明
 
 
 

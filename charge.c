@@ -34,13 +34,19 @@ void charge()
             cards[i].money = (int)(cards[i].money * 100 + 0.5) / 100.0;
 
             printf("-----------充值结果如下-----------\n");
-            printf("卡号:%s\n", cards[i].cardID);
-            printf("充值金额: %.2f\n", amount);
-            printf("当前余额: %.2f\n", cards[i].money);
+
+            printf("+----------------------+----------------------+----------------------+\n");
+            printf("| 卡号                 | 充值金额             | 当前余额             |\n");
+            printf("+----------------------+----------------------+----------------------+\n");
+            printf("| %-20s | %-20.2f | %-20.2f |\n", cards[i].cardID, amount, cards[i].money);
+            printf("+----------------------+----------------------+----------------------+\n");
+            
             system("pause");
             system("cls");            
             return;
         }
     }
     printf("未找到该卡！\n");
+    system("pause");
+    system("cls"); 
 }

@@ -57,9 +57,11 @@ void cancel_card()
                 }
 
                 printf("------------注销信息如下-----------\n");
-                printf("卡号: %s\n", cards[i].cardID);
-                // 将余额退款
-                printf("退款金额: %.2f\n", cards[i].money);
+                printf("+----------------------+----------------------+\n");
+                printf("| 卡号                 | 退款金额             |\n");
+                printf("+----------------------+----------------------+\n");
+                printf("| %-20s | %-20.2f |\n", cards[i].cardID, cards[i].money);
+                printf("+----------------------+----------------------+\n");
 
                 cards[i].state = 3;   // 更新状态为注销
                 cards[i].money = 0;   // 余额清零

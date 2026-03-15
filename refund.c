@@ -74,14 +74,21 @@ void refund()
                 cards[i].money = (int)(cards[i].money * 100 + 0.5) / 100.0;
 
                 printf("-----------退款结果如下-----------\n");
-                printf("卡号:%s\n", cards[i].cardID);
-                printf("退款金额: %.2f\n", amount);
-                printf("剩余余额: %.2f\n", cards[i].money);
+
+                printf("+----------------------+----------------------+----------------------+\n");
+                printf("| 卡号                 | 退款金额             | 当前余额             |\n");
+                printf("+----------------------+----------------------+----------------------+\n");
+                printf("| %-20s | %-20.2f | %-20.2f |\n", cards[i].cardID, amount, cards[i].money);
+                printf("+----------------------+----------------------+----------------------+\n");
+                
                 system("pause");
                 system("cls");            
+                
                 return;
             }  
         }
     }
     printf("未找到该卡！\n");
+    system("pause");
+    system("cls");
 }
