@@ -65,14 +65,11 @@ void search_card_records()
     int end = date_to_int(end_year, end_month, end_day);
 
     int found = 0;    // 标记是否找到记录
+    int log_year, log_month, log_day;
 
-    for (int i = 0; i < count; i++)
+    // 只检查目标卡号，避免将其他卡号记录也输出出来
+    if (sscanf(logins[cardIndex].login_time, "%d-%d-%d", &log_year, &log_month, &log_day) == 3)
     {
-        int log_year, log_month, log_day;
-
-        // 从 login_time 里提取 年月日
-        sscanf(logins[i].login_time, "%d-%d-%d", &log_year, &log_month, &log_day);
-
         int cur = date_to_int(log_year, log_month, log_day);    // 将登录时间转换为整数进行比较
 
         if (cur >= start && cur <= end)
@@ -82,28 +79,23 @@ void search_card_records()
             printf("+--------+--------+----------------------+----------------------+\n");
 
             printf("| %-6s | %-6.2f | %-20s | %-20s |\n",
-                cards[i].cardID,
-                billings[i].amount_money,
-                logins[i].login_time,
-                settles[i].settle_time);
-            found = 1;            // 标记找到记录
-            
-            printf("+--------+--------+----------------------+----------------------+\n");
+                cards[cardIndex].cardID,
+                billings[cardIndex].amount_money,
+                logins[cardIndex].login_time,
+                settles[cardIndex].settle_time);
 
-            system("pause");
-            system("cls");
+            printf("+--------+--------+----------------------+----------------------+\n");
+            found = 1;            // 标记找到记录
         }
     }
-
-            
 
     if (!found)
     {
         printf("该时间段内没有记录。\n");
-
-        system("pause");
-        system("cls");
     }
+
+    system("pause");
+    system("cls");
 }
 
 
@@ -197,20 +189,23 @@ void statistics()
         {
             case 1:
                 search_card_records();
-                break;
+            break;
             case 2:
                 search_merchant_turnover_period();
-                break;
+            break;
             case 3:
                 search_merchant_turnover_year();
-                break;
+            break;
             case 0:
+                system("pause");
+                system("cls");
                 return;   // 返回主菜单
+            break;
             default:
                 printf("输入错误，请重新输入！\n");
                 system("pause");
                 system("cls");
-                break;
+            break;
         }
     }
 }
