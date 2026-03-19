@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run C Program",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.exe",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build C program",
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "externalConsole": true
+        }
+    ]
+}

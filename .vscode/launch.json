@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run C Project",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/C_experiment4_7/main.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/C_experiment4_7",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "preLaunchTask": "build C_experiment4_7"
+        }
+    ]
+}
