@@ -12,7 +12,8 @@ void off_computer(void)
     char cardID[10];
     char inputCode[50];
 
-    Card *card_current = card_head;
+    // 定义指针变量，分别指向卡片链表、账单链表、登录记录链表和结算记录链表的当前节点
+    Card *card_current = card_head;  
     Billing *billing_current = billing_head;
     Login *login_current = login_head;
     Settle *settle_current = settle_head;
@@ -24,14 +25,14 @@ void off_computer(void)
     while (card_current != NULL && billing_current != NULL &&     // 确保所有链表都在遍历
            login_current != NULL && settle_current != NULL)
     {
-        if (strcmp(card_current->cardID, cardID) == 0)
+        if (strcmp(card_current->cardID, cardID) == 0) // 找到匹配的卡号
         {
             double session_seconds;
             double amount;
-            SYSTEMTIME st;
+            SYSTEMTIME st;                             // 获取系统时间的结构体
             Record *new_record;
 
-            if (card_current->state != 2)             
+            if (card_current->state != 2)           // 上机状态为2，如果不是上机状态则无法下机
             {
                 printf("该卡当前不在上机状态。\n");
                 system("pause");
@@ -49,7 +50,8 @@ void off_computer(void)
                 return;
             }
 
-            GetLocalTime(&st);
+            GetLocalTime(&st);  // 获取当前系统时间
+            // 将当前时间格式化为字符串，存储在结算记录的settle_time字段中
             sprintf(settle_current->settle_time, "%04d-%02d-%02d %02d:%02d:%02d",
                     st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 
@@ -65,14 +67,14 @@ void off_computer(void)
             }
 
             amount = session_seconds * 0.02;             // 每秒0.02元
-            amount = (int)(amount * 100 + 0.5) / 100.0;
+            amount = (int)(amount * 100 + 0.5) / 100.0;  // 保留两位小数，四舍五入
 
-            if (amount > card_current->money)
+            if (amount > card_current->money)            // 余额不足，无法下机
             {
                 printf("余额不足，请先充值。\n");
                 billing_current->nStatus = 0;            // 设置账单状态为未结算
-                settle_current->nStatus = 0;             // 设置结算状态为未结算
-                settle_current->settle_time[0] = '\0';   // 清空结算时间
+                settle_current->nStatus = 0;             // 设置下机状态为未结算
+                settle_current->settle_time[0] = '\0';   // 清空下机时间
 
                 system("pause");
                 system("cls");
@@ -80,21 +82,22 @@ void off_computer(void)
                 return;
             }
 
+            // 更新卡片信息
             card_current->money -= amount;         
             card_current->money = (int)(card_current->money * 100 + 0.5) / 100.0;
             card_current->used_money += amount;
             strcpy(card_current->last_time, settle_current->settle_time);  // 更新上次使用时间
 
             // 更新账单信息
-            billing_current->amount_money += amount;
+            billing_current->amount_money += amount;      // 累计使用金额
             billing_current->amount_money = (int)(billing_current->amount_money * 100 + 0.5) / 100.0;
-            billing_current->money = card_current->money;
-            billing_current->use_count = card_current->use_count;
-            billing_current->nStatus = 1;
-            strcpy(billing_current->last_time, settle_current->settle_time);
+            billing_current->money = card_current->money; // 更新账单中的余额
+            billing_current->use_count = card_current->use_count; // 更新使用次数
+            billing_current->nStatus = 1;                 // 设置账单状态为已结算
+            strcpy(billing_current->last_time, settle_current->settle_time); // 更新账单中的上次使用时间
 
-            // 更新登录记录和结算记录
-            login_current->money = card_current->money;
+            // 更新上机记录和下机记录
+            login_current->money = card_current->money;   // 更新上机记录中的余额
             login_current->used_money = billing_current->amount_money;
             login_current->use_count = card_current->use_count;
 
@@ -102,12 +105,13 @@ void off_computer(void)
             settle_current->money = card_current->money;
             settle_current->used_money = billing_current->amount_money;
             settle_current->use_count = card_current->use_count;
-            settle_current->nStatus = 1;
+            settle_current->nStatus = 1; // 设置结算状态为已结算
 
             // 记录消费信息到Record链表
-            new_record = (Record *)calloc(1, sizeof(Record));
+            new_record = (Record *)calloc(1, sizeof(Record)); // 分配内存并初始化为0
             if (new_record != NULL)
             {
+                // 将消费记录的信息填充到新记录中
                 strcpy(new_record->cardID, card_current->cardID);
                 new_record->amount = amount;
                 new_record->year = st.wYear;
@@ -116,19 +120,19 @@ void off_computer(void)
                 new_record->hour = st.wHour;
                 new_record->minute = st.wMinute;
                 new_record->second = st.wSecond;
-                new_record->next = NULL;
+                new_record->next = NULL; // 初始化新记录的next指针为NULL
 
-                if (record_head == NULL)
+                if (record_head == NULL) // 如果记录链表为空，则将新记录设置为头节点
                 {
                     record_head = new_record;
                 }
                 else
                 {
-                    Record *tail = record_head;
-                    while (tail->next != NULL) tail = tail->next;
-                    tail->next = new_record;
+                    Record *tail = record_head; 
+                    while (tail->next != NULL) tail = tail->next; // 找到链表的最后一个节点
+                    tail->next = new_record;    // 将新记录链接到链表末尾
                 }
-                recordCount++;
+                recordCount++; // 记录总数加1
             }
 
             printf("下机成功！\n"); 

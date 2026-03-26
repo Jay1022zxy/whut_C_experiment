@@ -11,7 +11,7 @@ void cancel_card()
     printf("请输入要注销的卡号(5位数字):\n");
     scanf("%9s", cardID);
 
-    Card *card_current = card_head;
+    Card *card_current = card_head; 
 
     for (int i = 0; i < count; i++)
     {
@@ -33,7 +33,7 @@ void cancel_card()
             }
             // 输入密码验证
             printf("请输入密码:\n");
-            char inputCode[50];
+            char inputCode[50];  // 定义一个临时变量来存储用户输入的密码
             if (scanf("%49s", inputCode) != 1)
             {
                 printf("密码输入失败，请重新输入！\n");

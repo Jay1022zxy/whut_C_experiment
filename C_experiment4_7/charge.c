@@ -11,9 +11,9 @@ void charge()
     printf("请输入要充值的卡号(5位数字):\n");
     scanf("%9s", cardID);
     
-    Card *card_current = card_head;
+    Card *card_current = card_head; // 从链表头开始遍历
 
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++) // 遍历链表
     {
         if (strcmp(card_current->cardID, cardID) == 0)
         {

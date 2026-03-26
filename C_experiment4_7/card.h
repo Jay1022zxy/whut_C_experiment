@@ -3,7 +3,7 @@
 #define MAX 1000
 extern int count;        // 声明全局变量count，表示卡片数量
 
-typedef struct Card
+typedef struct Card 
 {
     char cardID[10];    // 卡号固定为5位且唯一
     char code[50];      // 密码

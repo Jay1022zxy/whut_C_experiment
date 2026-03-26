@@ -23,7 +23,7 @@ static Card *find_card_by_id(const char *cardID)     // 根据卡号在卡片链
     return NULL;
 }
 
-// 查询某卡在时间段内的消费记录,首先输入卡号和密码进行验证,然后输入开始日期和结束日期,最后遍历记录链表,找到符合条件的记录并输出
+// 1. 查询某卡在时间段内的消费记录,首先输入卡号和密码进行验证,然后输入开始日期和结束日期,最后遍历记录链表,找到符合条件的记录并输出
 static void search_card_records(void)
 {
     char cardID[6];
@@ -39,10 +39,12 @@ static void search_card_records(void)
     printf("请输入卡号: ");
     scanf("%5s", cardID);
 
-    card_current = find_card_by_id(cardID);
+    card_current = find_card_by_id(cardID); // 寻找对应的卡片节点,如果找不到则提示未找到该卡并返回
     if (card_current == NULL)
     {
         printf("未找到该卡。\n");
+        system("pause");
+        system("cls");
         return;
     }
 
@@ -51,6 +53,8 @@ static void search_card_records(void)
     if (strcmp(card_current->code, code) != 0)
     {
         printf("密码错误。\n");
+        system("pause");
+        system("cls");
         return;
     }
 
@@ -95,15 +99,17 @@ static void search_card_records(void)
     else
     {
         printf("该时间段内没有消费记录。\n");
+        system("pause");
+        system("cls");
     }
 }
 
-// 查询时间段营业额,首先输入开始日期和结束日期,然后遍历记录链表,找到符合条件的记录并累加金额,最后输出总营业额
+// 2. 查询时间段营业额,首先输入开始日期和结束日期,然后遍历记录链表,找到符合条件的记录并累加金额,最后输出总营业额
 static void search_merchant_turnover_period(void)
 {
     int sy, sm, sd, ey, em, ed;
     int start, end;
-    double total = 0.0;
+    double total = 0.0; // 定义一个变量total来存储总营业额,初始值为0.0
     Record *record_current = record_head;
 
     printf("-----------查询时间段营业额-----------\n");
@@ -116,7 +122,7 @@ static void search_merchant_turnover_period(void)
     end = date_to_int(ey, em, ed);
 
     // 遍历记录链表,找到符合条件的记录并累加金额
-    while (record_current != NULL)
+    while (record_current != NULL) 
     {
         int cur = date_to_int(record_current->year, record_current->month, record_current->day);
         if (cur >= start && cur <= end)
@@ -128,20 +134,22 @@ static void search_merchant_turnover_period(void)
 
     printf("%04d-%02d-%02d 到 %04d-%02d-%02d 的营业额为: %.2f\n",
            sy, sm, sd, ey, em, ed, total);
+    system("pause");
+    system("cls");
 }
 
-// 查询某年每月营业额,首先输入年份,然后遍历记录链表,找到符合条件的记录并累加每个月的金额,最后输出每个月的营业额
+// 3. 查询某年每月营业额,首先输入年份,然后遍历记录链表,找到符合条件的记录并累加每个月的金额,最后输出每个月的营业额
 static void search_merchant_turnover_year(void)   
 {
     int year;
-    double monthTotal[12] = {0};
+    double monthTotal[12] = {0}; // 定义一个数组monthTotal来存储每个月的营业额,初始值都为0.0
     int i;
     Record *record_current = record_head;
 
     printf("请输入年份: ");
     scanf("%d", &year);
 
-    while (record_current != NULL)
+    while (record_current != NULL) // 遍历记录链表,找到符合条件的记录并累加每个月的金额
     {
         if (record_current->year == year && record_current->month >= 1 && record_current->month <= 12)
         {
@@ -154,6 +162,8 @@ static void search_merchant_turnover_year(void)
     {
         printf("%2d 月: %.2f\n", i + 1, monthTotal[i]);
     }
+    system("pause");
+    system("cls");
 }
 
 void statistics(void)
@@ -197,7 +207,5 @@ void statistics(void)
                 break;
         }
 
-        system("pause");
-        system("cls");
     }
 }

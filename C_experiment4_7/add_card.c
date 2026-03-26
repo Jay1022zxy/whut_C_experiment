@@ -6,31 +6,32 @@
 #include "billing.h"
 #include "computer.h"
 
-static int is_unique_card_id(const char *cardID)
+static int is_unique_card_id(const char *cardID) // 检查卡号是否唯一
 {
-    Card *current = card_head;
-    while (current != NULL)
+    Card *current = card_head;                   // 从链表头开始遍历
+    while (current != NULL)                     
     {
         if (strcmp(current->cardID, cardID) == 0)
         {
-            return 0;
+            return 0;               // 如果找到相同的卡号，返回0表示不唯一
         }
-        current = current->next;
+        current = current->next;    // 继续遍历下一个节点
     }
-    return 1;
+    return 1;                       // 如果遍历完整个链表都没有找到相同的卡号，返回1表示唯一
 }
 
-void add_card(void)
+void add_card()
 {
     // 分配内存并初始化为0
-    Card *new_card = (Card *)calloc(1, sizeof(Card));                 
+    Card *new_card = (Card *)calloc(1, sizeof(Card));      // calloc开辟1个Card结构体大小的内存，并将其初始化为0              
     Billing *new_billing = (Billing *)calloc(1, sizeof(Billing));
     Login *new_login = (Login *)calloc(1, sizeof(Login));
     Settle *new_settle = (Settle *)calloc(1, sizeof(Settle));
 
     if (new_card == NULL || new_billing == NULL || new_login == NULL || new_settle == NULL)  // 检查内存分配是否成功
     {
-        free(new_card);   
+        // 如果内存分配失败，释放已分配的内存并返回
+        free(new_card);    
         free(new_billing);
         free(new_login);
         free(new_settle);
@@ -62,8 +63,8 @@ void add_card(void)
 
     while (1)
     {
-        int has_letter = 0;
-        int has_digit = 0;
+        int has_letter = 0; // 字母数
+        int has_digit = 0;  // 数字数
         int i;
 
         printf("请输入密码(字母+数字，最长15位): ");
@@ -88,7 +89,7 @@ void add_card(void)
             }
         }
 
-        if (!has_letter || !has_digit)
+        if (!has_letter || !has_digit) 
         {
             printf("密码必须同时包含字母和数字。\n");
             continue;

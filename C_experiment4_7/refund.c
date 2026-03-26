@@ -15,7 +15,7 @@ void refund()
     Card *card_current = card_head;
     Billing *billing_current = billing_head;
 
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)  // 遍历卡片链表和账单链表
     {
         if (strcmp(card_current->cardID, cardID) == 0)
         {
@@ -56,40 +56,39 @@ void refund()
                 system("cls");
                 return;
             }
-            if (strcmp(card_current->code, inputCode) == 0)
+            
+            double amount; // 定义一个变量amount来存储用户输入的退款金额
+            printf("请输入退款金额: \n");
+            if (scanf("%lf", &amount) != 1 || amount <= 0)
             {
-                double amount;
-                printf("请输入退款金额: \n");
-                if (scanf("%lf", &amount) != 1 || amount <= 0)
-                {
-                    printf("输入错误：请输入正数金额！\n");
-                    while (getchar() != '\n');  // 清除非法输入
-                    continue;
-                }
-                if (amount > card_current->money)
-                {
-                    printf("退款金额超过当前余额！\n");
-                    system("pause");
-                    system("cls");
-                    return;
-                }
-                card_current->money -= amount; // 减少余额
-                // 对余额进行四舍五入，保留两位小数
-                card_current->money = (int)(card_current->money * 100 + 0.5) / 100.0;
-
-                printf("-----------退款结果如下-----------\n");
-
-                printf("+----------------------+----------------------+----------------------+\n");
-                printf("| 卡号                 | 退款金额             | 当前余额             |\n");
-                printf("+----------------------+----------------------+----------------------+\n");
-                printf("| %-20s | %-20.2f | %-20.2f |\n", card_current->cardID, amount, card_current->money);
-                printf("+----------------------+----------------------+----------------------+\n");
-                
+                printf("输入错误：请输入正数金额！\n");
+                while (getchar() != '\n');  // 清除非法输入
+                continue;
+            }
+            if (amount > card_current->money)
+            {
+                printf("退款金额超过当前余额！\n");
                 system("pause");
-                system("cls");            
-                
+                system("cls");
                 return;
-            }  
+            }
+            card_current->money -= amount; // 减少余额
+            // 对余额进行四舍五入，保留两位小数
+            card_current->money = (int)(card_current->money * 100 + 0.5) / 100.0;
+
+            printf("-----------退款结果如下-----------\n");
+
+            printf("+----------------------+----------------------+----------------------+\n");
+            printf("| 卡号                 | 退款金额             | 当前余额             |\n");
+            printf("+----------------------+----------------------+----------------------+\n");
+            printf("| %-20s | %-20.2f | %-20.2f |\n", card_current->cardID, amount, card_current->money);
+            printf("+----------------------+----------------------+----------------------+\n");
+            
+            system("pause");
+            system("cls");            
+            
+            return;
+              
         }
     }
     printf("未找到该卡！\n");

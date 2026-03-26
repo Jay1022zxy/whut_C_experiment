@@ -56,49 +56,50 @@ void on_computer(void)
                 return;
             }
 
-            {
-                SYSTEMTIME st;
-                GetLocalTime(&st);
+            SYSTEMTIME st;          // 获取系统时间的结构体
+            GetLocalTime(&st);      // 获取当前系统时间
 
-                sprintf(login_current->login_time, "%04d-%02d-%02d %02d:%02d:%02d",
-                        st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+            // 将当前时间格式化为字符串，存储在登录记录的login_time字段中
+            sprintf(login_current->login_time, "%04d-%02d-%02d %02d:%02d:%02d",
+                    st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 
-                card_current->state = 2;        // 更新卡片状态为上机
-                card_current->use_count++;      // 增加使用次数
-                strcpy(card_current->last_time, login_current->login_time);
+            card_current->state = 2;        // 更新卡片状态为上机
+            card_current->use_count++;      // 增加使用次数
+            strcpy(card_current->last_time, login_current->login_time);
 
-                // 更新账单信息
-                billing_current->state = 2;     // 更新账单状态为上机
-                billing_current->money = card_current->money;
-                billing_current->use_count = card_current->use_count;
-                billing_current->nStatus = 0;   // 设置账单状态为未结算
-                strcpy(billing_current->last_time, login_current->login_time);
+            // 更新账单信息
+            billing_current->state = 2;     // 更新账单状态为上机
+            billing_current->money = card_current->money;
+            billing_current->use_count = card_current->use_count;
+            billing_current->nStatus = 0;   // 设置账单状态为未结算
+            strcpy(billing_current->last_time, login_current->login_time);
 
-                // 更新登录记录
-                login_current->money = card_current->money;
-                login_current->used_money = billing_current->amount_money;
-                login_current->use_count = card_current->use_count;
+            // 更新上机记录
+            login_current->money = card_current->money;
+            login_current->used_money = billing_current->amount_money;
+            login_current->use_count = card_current->use_count;
 
-                // 更新结算记录
-                settle_current->money = card_current->money;
-                settle_current->used_money = billing_current->amount_money;
-                settle_current->use_count = card_current->use_count;
-                settle_current->settle_time[0] = '\0';
-                settle_current->nStatus = 0;   // 设置结算状态为未结算
+            // 更新结算记录
+            settle_current->money = card_current->money;
+            settle_current->used_money = billing_current->amount_money;
+            settle_current->use_count = card_current->use_count;
+            settle_current->settle_time[0] = '\0';
+            settle_current->nStatus = 0;   // 设置结算状态为未结算
 
-                printf("------------- 上机信息如下------------\n");
-                printf("+--------+---------------+----------------------+\n");
-                printf("| 卡号   | 余额          | 上机时间             |\n");
-                printf("+--------+---------------+----------------------+\n");
-                printf("| %-6s | %-10.2fRMB | %-20s |\n", card_current->cardID, card_current->money, login_current->login_time);
-                printf("+--------+---------------+----------------------+\n");
+            printf("------------- 上机信息如下------------\n");
+            printf("+--------+---------------+----------------------+\n");
+            printf("| 卡号   | 余额          | 上机时间             |\n");
+            printf("+--------+---------------+----------------------+\n");
+            printf("| %-6s | %-10.2fRMB | %-20s |\n", card_current->cardID, card_current->money, login_current->login_time);
+            printf("+--------+---------------+----------------------+\n");
 
-                system("pause");
-                system("cls");
-                return;
-            }
+            system("pause");
+            system("cls");
+            return;
+        
         }
 
+        // 移动到下一个节点
         card_current = card_current->next;
         billing_current = billing_current->next;
         login_current = login_current->next;

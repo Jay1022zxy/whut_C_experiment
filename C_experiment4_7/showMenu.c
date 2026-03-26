@@ -2,7 +2,7 @@
 #include <windows.h>
 #include "showMenu.h"
 
-void showMenu()
+void showMenu() 
 {   
     printf("作者：周祥宇  数学类2502  学号：1025009088\n");
     printf("欢迎进入计费管理系统\n");
