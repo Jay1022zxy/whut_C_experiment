@@ -163,3 +163,122 @@ void off_computer(void)
     system("pause");
     system("cls");
 }
+
+void off_computer_user(Card *current_card, Billing *current_billing, Login *current_login, Settle *current_settle)
+{
+    if (current_card == NULL || current_billing == NULL || current_login == NULL || current_settle == NULL)
+    {
+        printf("用户数据异常，无法下机！\n");
+        system("pause");
+        system("cls");
+        return;
+    }
+
+        double session_seconds;
+        double amount;
+        SYSTEMTIME st;                    // 获取系统时间的结构体   
+        Record *new_record;
+
+        GetLocalTime(&st);  // 获取当前系统时间
+        // 将当前时间格式化为字符串，存储在结算记录的settle_time字段中
+        sprintf(current_settle->settle_time, "%04d-%02d-%02d %02d:%02d:%02d",
+                st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+
+        // 用atoi函数提取登录时间中的小时、分钟和秒，并计算上机时长 +11, +14, +17是因为登录时间格式为 "YYYY-MM-DD HH:MM:SS"
+        // +11是跳过前面10个字符的日期和空格，直接定位到小时部分；+14是跳过小时和冒号，定位到分钟部分；+17是跳过分钟和冒号，定位到秒部分。
+        session_seconds = (st.wHour - atoi(current_login->login_time + 11)) * 3600.0 +   
+                            (st.wMinute - atoi(current_login->login_time + 14)) * 60.0 +
+                            (st.wSecond - atoi(current_login->login_time + 17));
+        // 如果计算结果为负数，说明跨过了午夜，需要加上24小时的秒数
+        if (session_seconds < 0)  
+        {
+            session_seconds += 24 * 3600.0;  
+        }
+
+        amount = session_seconds * 0.02;             // 每秒0.02元
+        amount = (int)(amount * 100 + 0.5) / 100.0;  // 保留两位小数，四舍五入
+
+        if (amount > current_card->money)            // 余额不足，无法下机
+        {
+            printf("余额不足，请先充值。\n");
+            current_billing->nStatus = 0;            // 设置账单状态为未结算
+            current_settle->nStatus = 0;             // 设置下机状态为未结算
+            current_settle->settle_time[0] = '\0';   // 清空下机时间
+
+            system("pause");
+            system("cls");
+
+            return;
+        }
+
+        // 更新卡片信息
+        current_card->money -= amount;         
+        current_card->money = (int)(current_card->money * 100 + 0.5) / 100.0;
+        current_card->used_money += amount;
+        strcpy(current_card->last_time, current_settle->settle_time);  // 更新上次使用时间
+
+        // 更新账单信息
+        current_billing->amount_money += amount;      // 累计使用金额
+        current_billing->amount_money = (int)(current_billing->amount_money * 100 + 0.5) / 100.0;
+        current_billing->money = current_card->money; // 更新账单中的余额
+        current_billing->use_count = current_card->use_count; // 更新使用次数
+        current_billing->nStatus = 1;                 // 设置账单状态为已结算
+        strcpy(current_billing->last_time, current_settle->settle_time); // 更新账单中的上次使用时间
+
+        // 更新上机记录和下机记录
+        current_login->money = current_card->money;   // 更新上机记录中的余额
+        current_login->used_money = current_billing->amount_money;
+        current_login->use_count = current_card->use_count;
+
+        // 结算记录更新
+        current_settle->money = current_card->money;
+        current_settle->used_money = current_billing->amount_money;
+        current_settle->use_count = current_card->use_count;
+        current_settle->nStatus = 1; // 设置结算状态为已结算
+
+        // 记录消费信息到Record链表
+        new_record = (Record *)calloc(1, sizeof(Record)); // 分配内存并初始化为0
+        if (new_record != NULL)
+        {
+            // 将消费记录的信息填充到新记录中
+            strcpy(new_record->cardID, current_card->cardID);
+            new_record->amount = amount;
+            new_record->year = st.wYear;
+            new_record->month = st.wMonth;
+            new_record->day = st.wDay;
+            new_record->hour = st.wHour;
+            new_record->minute = st.wMinute;
+            new_record->second = st.wSecond;
+            new_record->next = NULL; // 初始化新记录的next指针为NULL
+
+            if (record_head == NULL) // 如果记录链表为空，则将新记录设置为头节点
+            {
+                record_head = new_record;
+            }
+            else
+            {
+                Record *tail = record_head; 
+                while (tail->next != NULL) tail = tail->next; // 找到链表的最后一个节点
+                tail->next = new_record;    // 将新记录链接到链表末尾
+            }
+            recordCount++; // 记录总数加1
+        }
+
+        printf("下机成功！\n"); 
+        current_card->state = 1; // 更新卡片状态为正常
+        current_billing->nStatus = 1; // 更新账单状态为已结算
+        current_settle->nStatus = 1; // 更新结算状态为已结算
+
+        printf("+--------+--------+------------+----------------------+----------------------+\n");
+        printf("| 卡号   | 消费   | 余额       | 上机时间             | 下机时间             |\n");
+        printf("+--------+--------+------------+----------------------+----------------------+\n");
+        printf("| %-6s | %-6.2f | %-10.2f | %-20s | %-20s |\n", 
+            current_card->cardID, current_billing->amount_money, current_card->money, 
+            current_card->last_time, current_settle->settle_time);
+        printf("+--------+--------+------------+----------------------+----------------------+\n");
+        system("pause");
+        system("cls");            
+        return;
+        return;
+        
+}

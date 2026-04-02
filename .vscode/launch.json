@@ -2,18 +2,25 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run C Project",
+            "name": "Debug C_experiment4_7",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/C_experiment4_7/main.exe",
+            "program": "${workspaceFolder}\\C_experiment4_7\\main.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/C_experiment4_7",
+            "cwd": "${workspaceFolder}\\C_experiment4_7",
             "environment": [],
             "externalConsole": true,
             "MIMode": "gdb",
-            "miDebuggerPath": "gdb",
-            "preLaunchTask": "build C_experiment4_7"
+            "miDebuggerPath": "D:\\mingw64\\bin\\gdb.exe",
+            "preLaunchTask": "build c_experiment4_7",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }

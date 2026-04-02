@@ -74,5 +74,10 @@ void cancel_card()
                 return;
             }
         }
+
+        card_current = card_current->next; // 移动到下一个节点
     }
-} 
+    printf("未找到该卡！\n");
+    system("pause");
+    system("cls");
+}

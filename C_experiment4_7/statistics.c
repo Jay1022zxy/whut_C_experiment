@@ -3,24 +3,11 @@
 #include <windows.h>
 #include "card.h"
 #include "record.h"
+#include "find_card.h"
 
 static int date_to_int(int year, int month, int day)  // 将日期转换为整数格式,以便比较日期的先后顺序,格式为YYYYMMDD
 {
     return year * 10000 + month * 100 + day;
-}
-
-static Card *find_card_by_id(const char *cardID)     // 根据卡号在卡片链表中查找对应的卡片节点,如果找到则返回指向该节点的指针,否则返回NULL
-{
-    Card *current = card_head;
-    while (current != NULL)
-    {
-        if (strcmp(current->cardID, cardID) == 0)
-        {
-            return current;
-        }
-        current = current->next;
-    }
-    return NULL;
 }
 
 // 1. 查询某卡在时间段内的消费记录,首先输入卡号和密码进行验证,然后输入开始日期和结束日期,最后遍历记录链表,找到符合条件的记录并输出
@@ -74,7 +61,7 @@ static void search_card_records(void)
             if (!found)  // 如果是第一次找到符合条件的记录,则输出表头
             {
                 printf("+--------+--------+----------------------+\n");
-                printf("| 卡号   | 金额   | 时间                 |\n");
+                printf("| 卡号   | 金额   | 下机时间             |\n");
                 printf("+--------+--------+----------------------+\n");
             }
 
@@ -207,5 +194,60 @@ void statistics(void)
                 break;
         }
 
+    }
+}
+
+void search_records_user(Card *current_card, Billing *current_billing)
+{
+    printf("-----------查询本卡消费记录-----------\n");
+
+    int sy, sm, sd, ey, em, ed;
+    int start, end;
+    int found = 0;
+    Record *record_current = record_head;
+    
+    printf("请输入开始日期(年 月 日): ");
+    scanf("%d %d %d", &sy, &sm, &sd);
+    printf("请输入结束日期(年 月 日): ");
+    scanf("%d %d %d", &ey, &em, &ed);
+
+    start = date_to_int(sy, sm, sd);
+    end = date_to_int(ey, em, ed);
+
+    while (record_current != NULL)
+    {
+        int cur = date_to_int(record_current->year, record_current->month, record_current->day);
+        if (strcmp(record_current->cardID, current_card->cardID) == 0 && cur >= start && cur <= end)
+        {
+            if (!found)  // 如果是第一次找到符合条件的记录,则输出表头
+            {
+                printf("+--------+--------+----------------------+\n");
+                printf("| 卡号   | 金额   | 下机时间             |\n");
+                printf("+--------+--------+----------------------+\n");
+            }
+
+            printf("| %-6s | %-6.2f | %04d-%02d-%02d %02d:%02d:%02d  |\n",
+                   record_current->cardID,
+                   record_current->amount,
+                   record_current->year,
+                   record_current->month,
+                   record_current->day,
+                   record_current->hour,
+                   record_current->minute,
+                   record_current->second);
+            found = 1;
+        }
+        record_current = record_current->next;
+    }
+
+    if (found) // 如果找到至少一条符合条件的记录,则输出表尾,否则提示没有记录
+    {
+        printf("+--------+--------+----------------------+\n");
+    }
+    else
+    {
+        printf("该时间段内没有消费记录。\n");
+        system("pause");
+        system("cls");
     }
 }

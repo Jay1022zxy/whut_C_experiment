@@ -75,3 +75,30 @@ void search_card()
     system("pause");
     system("cls");
 }
+
+void search_card_user(Card *current_card, Billing *current_billing)
+{
+    if (current_card == NULL || current_billing == NULL)
+    {
+        printf("当前未登录用户。\n");
+        return;
+    }
+
+    printf("-----------本人信息-----------\n");
+    printf("+--------+--------+------------+------------+------------+----------------------+\n");
+    printf("| 卡号   | 状态   | 余额       | 累计消费   | 使用次数   | 最后使用时间         |\n");
+    printf("+--------+--------+------------+------------+------------+----------------------+\n");
+
+    printf("| %-6s | %-6d | %-10.2f | %-10.2f | %-10d | %-20s |\n",
+           current_card->cardID,
+           current_card->state,
+           current_card->money,
+           current_billing->amount_money,
+           current_card->use_count,
+           current_card->last_time[0] ? current_card->last_time : "暂 无 记 录");
+
+    printf("+--------+--------+------------+------------+------------+----------------------+\n");
+
+    system("pause");
+    system("cls");
+}

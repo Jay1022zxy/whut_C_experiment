@@ -2,35 +2,40 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build C project",
+            "label": "build c_experiment4_7",
             "type": "shell",
-            "command": "gcc",
+            "command": "D:\\mingw64\\bin\\gcc.exe",
             "args": [
-                "C_experiment4_7/main.c",
-                "C_experiment4_7/add_card.c",
-                "C_experiment4_7/cancel_card.c",
-                "C_experiment4_7/charge.c",
-                "C_experiment4_7/off_computer.c",
-                "C_experiment4_7/on_computer.c",
-                "C_experiment4_7/refund.c",
-                "C_experiment4_7/search_card.c",
-                "C_experiment4_7/showMenu.c",
-                "C_experiment4_7/statistics.c",
-                "C_experiment4_7/storage.c",
-                "-o",
-                "C_experiment4_7/main.exe",
+                "-fdiagnostics-color=always",
                 "-g",
                 "-Wall",
-                "-std=c11"
+                "-std=c11",
+
+                "${workspaceFolder}\\C_experiment4_7\\main.c",
+                "${workspaceFolder}\\C_experiment4_7\\add_card.c",
+                "${workspaceFolder}\\C_experiment4_7\\cancel_card.c",
+                "${workspaceFolder}\\C_experiment4_7\\charge.c",
+                "${workspaceFolder}\\C_experiment4_7\\off_computer.c",
+                "${workspaceFolder}\\C_experiment4_7\\on_computer.c",
+                "${workspaceFolder}\\C_experiment4_7\\refund.c",
+                "${workspaceFolder}\\C_experiment4_7\\search_card.c",
+                "${workspaceFolder}\\C_experiment4_7\\showMenu.c",
+                "${workspaceFolder}\\C_experiment4_7\\statistics.c",
+                "${workspaceFolder}\\C_experiment4_7\\storage.c",
+                "${workspaceFolder}\\C_experiment4_7\\find_card.c",
+                "-o",
+                "${workspaceFolder}\\C_experiment4_7\\main.exe"
             ],
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}\\C_experiment4_7"
             },
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"]
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ]
 }

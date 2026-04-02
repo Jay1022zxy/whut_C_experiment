@@ -27,5 +27,7 @@ extern Settle *settle_head;  // 声明全局指针，指向结算记录链表的
 
 void on_computer(void);
 void off_computer(void);
+void on_computer_user(Card *current_card, Billing *current_billing, Login *current_login, Settle *current_settle);
+void off_computer_user(Card *current_card, Billing *current_billing, Login *current_login, Settle *current_settle);
 
 #endif

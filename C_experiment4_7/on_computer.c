@@ -110,3 +110,74 @@ void on_computer(void)
     system("pause");
     system("cls");
 }
+
+void on_computer_user(Card *current_card, Billing *current_billing, Login *current_login, Settle *current_settle)
+{
+    if (current_card == NULL || current_billing == NULL || current_login == NULL || current_settle == NULL)
+    {
+        printf("当前未登录用户。\n");
+        return;
+    }   
+    if (current_card->state == 3)
+    {
+        printf("该卡已注销，不能上机。\n");
+        system("pause");
+        system("cls");
+        return;
+    }
+    if (current_card->state == 2)
+    {
+        printf("该卡已经在上机状态。\n");
+        system("pause");
+        system("cls");
+        return;
+    }
+    if (current_card->money <= 0)
+    {
+        printf("余额不足，不能上机。\n");
+        system("pause");
+        system("cls");
+        return;
+    }
+
+    SYSTEMTIME st;          // 获取系统时间的结构体
+    GetLocalTime(&st);      // 获取当前系统时间
+
+    // 将当前时间格式化为字符串，存储在登录记录的login_time字段中
+    sprintf(current_login->login_time, "%04d-%02d-%02d %02d:%02d:%02d",
+            st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+
+    current_card->state = 2;        // 更新卡片状态为上机
+    current_card->use_count++;      // 增加使用次数
+    strcpy(current_card->last_time, current_login->login_time);
+
+    // 更新账单信息
+    current_billing->state = 2;     // 更新账单状态为上机
+    current_billing->money = current_card->money;
+    current_billing->use_count = current_card->use_count;
+    current_billing->nStatus = 0;   // 设置账单状态为未结算
+    strcpy(current_billing->last_time, current_login->login_time);
+
+    // 更新上机记录
+    current_login->money = current_card->money;
+    current_login->used_money = current_billing->amount_money;
+    current_login->use_count = current_card->use_count;
+
+    // 更新结算记录
+    current_settle->money = current_card->money;
+    current_settle->used_money = current_billing->amount_money;
+    current_settle->use_count = current_card->use_count;
+    current_settle->settle_time[0] = '\0';
+    current_settle->nStatus = 0;   // 设置结算状态为未结算
+
+    printf("------------- 上机信息如下------------\n");
+    printf("+--------+---------------+----------------------+\n");
+    printf("| 卡号   | 余额          | 上机时间             |\n");
+    printf("+--------+---------------+----------------------+\n");
+    printf("| %-6s | %-10.2fRMB | %-20s |\n", current_card->cardID, current_card->money, current_login->login_time);
+    printf("+--------+---------------+----------------------+\n");
+
+    system("pause");
+    system("cls");
+    return;
+}
