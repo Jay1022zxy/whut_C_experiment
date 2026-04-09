@@ -97,3 +97,63 @@ void refund()
     system("pause");
     system("cls");
 }
+
+void refund_user(Card *current_card, Billing *current_billing)
+{
+    printf("-----------退款-----------\n");
+   
+    
+        if (current_card->state == 3)  // state为3表示注销状态
+        {
+            printf("该卡已注销，无法退款！\n");
+            system("pause");
+            system("cls");
+            return;
+        }
+        if (current_card->state == 2) // state为2表示上机状态
+        {
+            printf("该卡正在使用中，无法退款！\n");
+            system("pause");
+            system("cls");
+            return;
+        }
+        if (current_billing->nStatus == 0) // nStatus为0表示未结算状态
+        {
+            printf("该卡有未结算的消费，无法退款！\n");
+            system("pause");
+            system("cls");
+            return;
+        }
+        double amount; // 定义一个变量amount来存储用户输入的退款金额
+        printf("请输入退款金额: \n");
+        if (scanf("%lf", &amount) != 1 || amount <= 0)
+        {
+            printf("输入错误：请输入正数金额！\n");
+            while (getchar() != '\n');  // 清除非法输入
+            
+        }
+        if (amount > current_card->money)
+        {
+            printf("退款金额超过当前余额！\n");
+            system("pause");
+            system("cls");
+            return;
+        }
+        current_card->money -= amount; // 减少余额
+        // 对余额进行四舍五入，保留两位小数
+        current_card->money = (int)(current_card->money * 100 + 0.5) / 100.0;
+
+        printf("-----------退款结果如下-----------\n");
+
+        printf("+----------------------+----------------------+----------------------+\n");
+        printf("| 卡号                 | 退款金额             | 当前余额             |\n");
+        printf("+----------------------+----------------------+----------------------+\n");
+        printf("| %-20s | %-20.2f | %-20.2f |\n", current_card->cardID, amount, current_card->money);
+        printf("+----------------------+----------------------+----------------------+\n");
+        
+        system("pause");
+        system("cls");            
+        
+        return;
+}
+    

@@ -243,6 +243,8 @@ void search_records_user(Card *current_card, Billing *current_billing)
     if (found) // 如果找到至少一条符合条件的记录,则输出表尾,否则提示没有记录
     {
         printf("+--------+--------+----------------------+\n");
+        system("pause");
+        system("cls");
     }
     else
     {

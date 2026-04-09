@@ -23,6 +23,7 @@
                 "${workspaceFolder}\\C_experiment4_7\\statistics.c",
                 "${workspaceFolder}\\C_experiment4_7\\storage.c",
                 "${workspaceFolder}\\C_experiment4_7\\find_card.c",
+                "${workspaceFolder}\\C_experiment4_7\\admin_card.c",
                 "-o",
                 "${workspaceFolder}\\C_experiment4_7\\main.exe"
             ],

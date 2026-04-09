@@ -29,5 +29,8 @@ void cancel_card();    // 注销卡函数声明
 void search_card_user(Card *current_card, Billing *current_billing); // 用户查询卡信息函数声明，传入当前用户的卡片和账单信息
 void search_records_user(Card *current_card, Billing *current_billing); // 用户查询消费记录函数声明，传入当前用户的卡片和账单信息
 void change_password(Card *current_card); // 修改密码函数声明
+void recharge(Card *current_card, Billing *current_billing); // 充值函数声明，传入当前用户的卡片和账单信息
+void refund_user(Card *current_card, Billing *current_billing); // 退款函数声明
+void reset_password(); // 重置用户密码函数声明
 
 #endif // CARD_H

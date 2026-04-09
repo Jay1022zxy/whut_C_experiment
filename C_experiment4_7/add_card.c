@@ -249,3 +249,93 @@ void change_password(Card *current_card)
     system("pause");
     system("cls");
 }
+
+void reset_password()
+{
+    printf("-----------重置密码-----------\n");
+    char cardID[10];
+    printf("请输入要重置密码的卡号(5位数字):\n");
+
+    if (scanf("%9s", cardID) != 1)
+    {
+        printf("卡号输入失败，请重新输入！\n");
+        while (getchar() != '\n');  // 清除非法输入
+        return;
+    }
+
+    Card *card_current = card_head; // 从链表头开始遍历
+
+    while (card_current != NULL) // 遍历链表
+    {
+        if (strcmp(card_current->cardID, cardID) == 0)
+        {
+            if (card_current->state == 3)  // state为3表示注销状态
+            {
+                printf("该卡已注销，无法重置密码！\n");
+                system("pause");
+                system("cls");
+                return;
+            }
+            if (card_current->state == 0)  // state为0表示未激活状态
+            {
+                printf("该卡未激活，无法重置密码！\n");
+                system("pause");
+                system("cls");
+                return;
+            }
+            if (card_current->state == 2)  // state为2表示上机状态
+            {
+                printf("该卡正在使用中，无法重置密码！\n");
+                system("pause");
+                system("cls");
+                return;
+            }
+            char new_password[50];
+            while (1)
+            {
+                int has_letter = 0; // 字母数
+                int has_digit = 0;  // 数字数
+                int i;
+
+                printf("请输入新密码(字母+数字，最长15位): ");
+                scanf("%49s", new_password);
+
+                if (strlen(new_password) > 15)
+                {
+                    printf("密码长度不能超过15位。\n");
+                    continue;
+                }
+
+                for (i = 0; new_password[i] != '\0'; ++i)           // 检查密码中是否包含字母和数字
+                {
+                    if ((new_password[i] >= 'a' && new_password[i] <= 'z') ||
+                        (new_password[i] >= 'A' && new_password[i] <= 'Z'))
+                    {
+                        has_letter = 1;
+                    }
+                    else if (new_password[i] >= '0' && new_password[i] <= '9')
+                    {
+                        has_digit = 1;
+                    }
+                }
+
+                if (!has_letter || !has_digit) 
+                {
+                    printf("密码必须同时包含字母和数字。\n");
+                    continue;
+                }
+                break;
+            }
+            strcpy(card_current->code, new_password); // 更新卡片的密码
+
+            printf("密码重置成功！\n");
+            system("pause");
+            system("cls");            
+            return;
+        }
+        card_current = card_current->next; // 移动到下一个节点
+    }
+    printf("未找到该卡！\n");
+    system("pause");
+    system("cls");
+}

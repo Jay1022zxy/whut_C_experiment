@@ -89,14 +89,27 @@ void search_card_user(Card *current_card, Billing *current_billing)
     printf("| 卡号   | 状态   | 余额       | 累计消费   | 使用次数   | 最后使用时间         |\n");
     printf("+--------+--------+------------+------------+------------+----------------------+\n");
 
-    printf("| %-6s | %-6d | %-10.2f | %-10.2f | %-10d | %-20s |\n",
-           current_card->cardID,
-           current_card->state,
-           current_card->money,
-           current_billing->amount_money,
-           current_card->use_count,
-           current_card->last_time[0] ? current_card->last_time : "暂 无 记 录");
-
+    if (current_card->last_time[0] == '\0')
+    {
+    printf("| %-6s | %-8s | %-10.2f | %-10.2f | %-10d | %-24s |\n",
+            current_card->cardID,
+            state_text(current_card->state),   // 将状态码转换为文本显示
+            current_card->money,
+            current_billing->amount_money,
+            current_card->use_count,
+            "暂 无 记 录");
+    }
+    else
+    {
+    printf("| %-6s | %-8s | %-10.2f | %-10.2f | %-10d | %-20s |\n",
+            current_card->cardID,
+            state_text(current_card->state),   // 将状态码转换为文本显示
+            current_card->money,
+            current_billing->amount_money,
+            current_card->use_count,
+            current_card->last_time);
+    
+    }
     printf("+--------+--------+------------+------------+------------+----------------------+\n");
 
     system("pause");

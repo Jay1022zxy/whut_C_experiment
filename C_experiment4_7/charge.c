@@ -54,3 +54,30 @@ void charge()
     system("pause");
     system("cls"); 
 }
+
+void recharge(Card *current_card, Billing *current_billing)
+{
+    printf("-----------充值-----------\n");
+    double amount;
+    printf("请输入充值金额: \n");
+    if (scanf("%lf", &amount) != 1 || amount <= 0)
+    {
+        printf("输入错误：请输入正数金额！\n");
+        while (getchar() != '\n');  // 清除非法输入
+        return;
+    }
+    current_card->money += amount; // 增加余额
+    // 对余额进行四舍五入，保留两位小数
+    current_card->money = (int)(current_card->money * 100 + 0.5) / 100.0;
+
+    printf("-----------充值结果如下-----------\n");
+
+    printf("+----------------------+----------------------+----------------------+\n");
+    printf("| 卡号                 | 充值金额             | 当前余额             |\n");
+    printf("+----------------------+----------------------+----------------------+\n");
+    printf("| %-20s | %-20.2f | %-20.2f |\n", current_card->cardID, amount, current_card->money);
+    printf("+----------------------+----------------------+----------------------+\n");
+    
+    system("pause");
+    system("cls");            
+}

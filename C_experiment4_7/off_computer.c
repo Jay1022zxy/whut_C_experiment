@@ -6,6 +6,7 @@
 #include "billing.h"
 #include "computer.h"
 #include "record.h"
+#define COSTING 0.02 // 定义每秒的费用常量
 
 void off_computer(void)
 {
@@ -66,7 +67,7 @@ void off_computer(void)
                 session_seconds += 24 * 3600.0;  
             }
 
-            amount = session_seconds * 0.02;             // 每秒0.02元
+            amount = session_seconds * COSTING;          // 费用
             amount = (int)(amount * 100 + 0.5) / 100.0;  // 保留两位小数，四舍五入
 
             if (amount > card_current->money)            // 余额不足，无法下机
@@ -174,6 +175,14 @@ void off_computer_user(Card *current_card, Billing *current_billing, Login *curr
         return;
     }
 
+    if(current_card->state != 2) // 上机状态为2，如果不是上机状态则无法下机
+    {
+        printf("该卡未处于上机状态，无法下机！\n");
+        system("pause");
+        system("cls");
+        return;
+    }
+
         double session_seconds;
         double amount;
         SYSTEMTIME st;                    // 获取系统时间的结构体   
@@ -195,7 +204,7 @@ void off_computer_user(Card *current_card, Billing *current_billing, Login *curr
             session_seconds += 24 * 3600.0;  
         }
 
-        amount = session_seconds * 0.02;             // 每秒0.02元
+        amount = session_seconds * COSTING;          // 费用
         amount = (int)(amount * 100 + 0.5) / 100.0;  // 保留两位小数，四舍五入
 
         if (amount > current_card->money)            // 余额不足，无法下机
@@ -269,13 +278,13 @@ void off_computer_user(Card *current_card, Billing *current_billing, Login *curr
         current_billing->nStatus = 1; // 更新账单状态为已结算
         current_settle->nStatus = 1; // 更新结算状态为已结算
 
-        printf("+--------+--------+------------+----------------------+----------------------+\n");
-        printf("| 卡号   | 消费   | 余额       | 上机时间             | 下机时间             |\n");
-        printf("+--------+--------+------------+----------------------+----------------------+\n");
-        printf("| %-6s | %-6.2f | %-10.2f | %-20s | %-20s |\n", 
-            current_card->cardID, current_billing->amount_money, current_card->money, 
-            current_card->last_time, current_settle->settle_time);
-        printf("+--------+--------+------------+----------------------+----------------------+\n");
+        printf("+--------+----------+------------+----------------------+----------------------+\n");
+        printf("| 卡号   | 消费     | 余额       | 上机时间             | 下机时间             |\n");
+        printf("+--------+----------+------------+----------------------+----------------------+\n");
+        printf("| %-6s | %-8.2f | %-10.2f | %-20s | %-20s |\n", 
+            current_card->cardID, amount, current_card->money, 
+            current_login->login_time, current_settle->settle_time);
+        printf("+--------+----------+------------+----------------------+----------------------+\n");
         system("pause");
         system("cls");            
         return;

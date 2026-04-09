@@ -1,8 +1,10 @@
 #ifndef SHOWMENU_H
 #define SHOWMENU_H
 
-void showMainMenu();
-void showMasterMenu();
-void showUserMenu();
+#include "admin_card.h"
 
-#endif 
+void showMainMenu(void);
+void showMasterMenu(const Admin *current_admin);
+void showUserMenu(void);
+
+#endif

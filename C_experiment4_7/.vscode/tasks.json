@@ -10,9 +10,12 @@
                 "-g",
                 "-Wall",
                 "-std=c11",
+                "-finput-charset=UTF-8",
+                "-fexec-charset=UTF-8",
 
                 "${workspaceFolder}\\C_experiment4_7\\main.c",
                 "${workspaceFolder}\\C_experiment4_7\\add_card.c",
+                "${workspaceFolder}\\C_experiment4_7\\admin_card.c",
                 "${workspaceFolder}\\C_experiment4_7\\cancel_card.c",
                 "${workspaceFolder}\\C_experiment4_7\\charge.c",
                 "${workspaceFolder}\\C_experiment4_7\\off_computer.c",

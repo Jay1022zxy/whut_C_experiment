@@ -1,26 +1,252 @@
-1.
-    问题确实在“读档”这一步，不在“写档”。
+1. 二进制文件版本兼容与旧数据迁移
+    难点说明：
+    程序在开发过程中多次修改了存储结构，从最初的文本存储逐步改成二进制存储，后面又增加了管理员相关数据。如果新版本程序不能识别旧版本文件，就会出现老数据无法读取、程序启动后数据丢失的问题。因此，如何在结构升级后继续兼容旧文件，是整个系统中最容易出问题的地方之一。
 
-    根因是 storage.c 之前用 sscanf("%[^|]") 解析 data.txt，但像这几行里有空字段：
+    关键性代码（storage.c）：
+    #define DATA_VERSION 3
 
-    BILLING|||0.00|0.00|0|0|-|1
-    LOGIN||0.00|0.00|0|-
-    SETTLE||0.00|0.00|0|-|0
-    空字段会让 sscanf 解析失败，load_data() 就把内存重新初始化成空，所以程序重启后 count 变回 0，
-    添加同卡号时自然检测不到重复，最后又把 data.txt 覆写了。
+    if (!read_block(file, &header_v1, sizeof(FileHeaderV1)) ||
+        memcmp(header_v1.magic, DATA_MAGIC_BYTES, sizeof(header_v1.magic)) != 0 ||
+        header_v1.card_count < 0 || header_v1.record_count < 0 ||
+        (header_v1.version != 1 && header_v1.version != 2 && header_v1.version != DATA_VERSION))
 
-    在 storage.c 里把读档改成按 | 手动切分字段，空字段也能正常读取。
-    重新编译了 main.exe。
-    我实际做了重启场景验证：当前 data.txt 里已有 12345，再次添加 12345 时，程序现在会正确提示“卡号已存在”。
-    你现在直接用新的 main.exe 再试一次就行。
-    如果你愿意，我下一步还可以顺手把 add_card.c 也补一下，让新增卡时同时把 billings[count]、logins[count]、
-    settles[count] 的对应卡号也一起写完整，这样 data.txt 会更整洁。
-2.  
-    从数组改成链表
+    if (header_v1.version == 2)
+    {
+        admin_node->permissions = ADMIN_PERMISSION_ALL;
+    }
+    else
+    {
+        admin_node->permissions = normalize_admin_permissions(admin_data.permissions);
+    }
 
-3. 
-    在添加卡函数，当前步错误时返回当前步重新输入，而非全部退出
-4.
-    二级指针的应用
-5. 
-    改成二进制存储读取的时候，因为卡号长度创建时不一致，读取出错
+    解决方法：
+    为了解决这个问题，我在二进制文件头中加入了魔数和版本号，程序加载文件时先验证文件是否合法，再根据版本号决定后续解析方案。这样做的好处是：一方面可以防止把无关文件误当成系统数据文件读取，另一方面也能针对不同版本采用不同的恢复逻辑。对于旧版本中没有权限字段的管理员数据，我没有直接判错，而是自动补全默认权限，使旧数据仍然能够被新程序正常使用。通过这种“版本识别 + 差异补全”的方式，系统在升级后仍保持了较好的兼容性。
+
+2. 读档失败时的统一回滚与内存清理
+    难点说明：
+    读取二进制文件不是一次性完成的，而是边申请内存边恢复链表。如果中间某一步读取失败，就会出现“前半部分已经读入，后半部分没有读完”的情况。此时如果不及时清理，内存中就会残留半成品数据，后续功能调用时很容易出现数据错乱甚至内存泄漏。
+
+    关键性代码（storage.c）：
+    void initialize_data(void)
+    {
+        free_cards();
+        free_billings();
+        free_logins();
+        free_settles();
+        free_records();
+        free_admin_list();
+        count = 0;
+        recordCount = 0;
+    }
+
+    if (!read_block(file, &header_v1, sizeof(FileHeaderV1)) ||
+        memcmp(header_v1.magic, DATA_MAGIC_BYTES, sizeof(header_v1.magic)) != 0)
+    {
+        initialize_data();
+        fclose(file);
+        return 0;
+    }
+
+    解决方法：
+    我把所有运行时数据的清理逻辑集中到了 `initialize_data()` 中，作为统一的回滚入口。每次重新加载文件前，先把旧链表全部释放；一旦读取过程中任意一步失败，也立刻调用该函数，把已经分配的结点和计数器全部恢复到初始状态。这样做避免了“旧数据和半截新数据同时存在”的情况，也让异常处理逻辑更统一，不需要在每个读档分支里重复写大量释放代码。对于实验报告来说，这部分体现的是程序不仅要能“正常运行”，还要能在异常情况下保证内部状态安全。
+
+3. 多链表长度一致性校验
+    难点说明：
+    本系统不是单链表结构，而是卡信息、账单信息、上机记录、下机记录四条链表一一对应。如果其中某一次新增、删除或恢复数据时少维护了一条链表，那么保存到文件时就会发生错位，后面再次读取时整组数据都会对不上。这个问题比普通的链表增删更难，因为它涉及多条链表之间的整体一致性。
+
+    关键性代码（storage.c）：
+    while (card_current != NULL && billing_current != NULL &&
+           login_current != NULL && settle_current != NULL)
+    {
+        card_total++;
+        card_current = card_current->next;
+        billing_current = billing_current->next;
+        login_current = login_current->next;
+        settle_current = settle_current->next;
+    }
+
+    if (card_current != NULL || billing_current != NULL ||
+        login_current != NULL || settle_current != NULL)
+    {
+        fclose(file);
+        return 0;
+    }
+
+    解决方法：
+    我没有默认认为四条链表永远正确，而是在保存数据前专门做了一次同步校验。程序会同时遍历四条链表，只要其中一条先结束或还没结束，就说明链表长度已经不一致，此时直接终止保存。这样做等于在“写文件之前”增加了一道保护，避免把错误数据继续写入磁盘。相比等到下次读档时才发现问题，这种做法更容易定位错误，也更能保证存储文件本身的完整性。
+
+4. 用户登录后的跨链表关联恢复与异常兜底
+    难点说明：
+    用户登录后，系统不能只找到卡片信息，还必须进一步找到与这张卡对应的账单、上机和下机记录。如果只找到 `Card`，却找不到 `Billing`、`Login` 或 `Settle`，那么用户虽然“登录成功”，后续所有功能都会出现异常。因此，如何根据卡号把多条链表中的对应节点重新关联起来，也是实现中的一个难点。
+
+    关键性代码（find_card.c / main.c）：
+    Billing *find_billing_by_id(const char *cardID)
+    {
+        Billing *p = billing_head;
+        while (p != NULL)
+        {
+            if (strcmp(p->cardID, cardID) == 0)
+            {
+                return p;
+            }
+            p = p->next;
+        }
+        return NULL;
+    }
+
+    current_billing = find_billing_by_id(current_card->cardID);
+    current_login = find_login_by_id(current_card->cardID);
+    current_settle = find_settle_by_id(current_card->cardID);
+
+    if (current_billing == NULL || current_login == NULL || current_settle == NULL)
+    {
+        printf("用户关联数据异常，登录失败！\n");
+    }
+
+    解决方法：
+    我采用“先按卡号查卡，再按同一卡号逐个查关联结点”的方式恢复用户运行环境，而不是简单依赖链表下标或默认顺序。这样即使链表在运行中发生调整，只要卡号还在，系统就能准确找到对应数据。与此同时，我还加上了关联数据为空时的兜底判断，只要有任意一个关联结点缺失，就直接终止登录，避免用户进入功能菜单后再出现更严重的空指针问题。这种设计把错误拦截在登录入口处，能明显降低系统异常传播的范围。
+
+5. 管理员权限系统的设计与删除边界约束
+    难点说明：
+    管理员不是单一身份，而是分成卡务、统计、管理等多种权限，而且一个管理员可能同时拥有多项权限。如果只用普通变量单独判断，不但扩展性差，而且条件分支会越来越复杂。此外，系统还必须保证始终保留至少一个具有管理权限的管理员，否则后续将无人能维护系统。
+
+    关键性代码（admin_card.c）：
+    switch (input[i])
+    {
+        case '1':
+            permissions |= ADMIN_PERMISSION_CARD;
+            break;
+        case '2':
+            permissions |= ADMIN_PERMISSION_STATISTICS;
+            break;
+        case '3':
+            permissions |= ADMIN_PERMISSION_MANAGE;
+            break;
+    }
+
+    if (admin_has_permission(current, ADMIN_PERMISSION_MANAGE) &&
+        count_admins_with_permission(ADMIN_PERMISSION_MANAGE) <= 1)
+    {
+        printf("至少要保留一个拥有管理权限的管理员。\\n");
+    }
+
+    解决方法：
+    为了让权限组合更灵活，我使用位运算来保存管理员权限。这样一个管理员既可以只拥有单个权限，也可以同时拥有多种权限，程序在判断时只需要进行按位与运算即可，逻辑会比多重 if 判断清晰很多。在删除管理员时，我又增加了“最后一个管理权限账号不能删”的约束，这一步非常关键，因为它保证了系统不会因为误操作而失去后台维护能力。通过“位运算管理权限 + 关键账号保护”的方式，管理员模块在功能性和安全性上都更完整。
+
+6. 卡状态流转与业务规则控制
+    难点说明：
+    一张卡在系统中不是始终可用的，它可能处于正常、上机、注销等不同状态。不同状态下允许执行的操作完全不同，例如上机状态不能注销，注销状态不能退款，未结算状态也不能退款。如果缺少这些业务约束，系统逻辑就会混乱，甚至会出现边上机边退款、已注销卡继续使用等明显错误。
+
+    关键性代码（refund.c / cancel_card.c）：
+    if (card_current->state == 3)
+    {
+        printf("该卡已注销，无法退款！\n");
+        return;
+    }
+    if (card_current->state == 2)
+    {
+        printf("该卡正在使用中，无法退款！\n");
+        return;
+    }
+    if (billing_current->nStatus == 0)
+    {
+        printf("该卡有未结算的消费，无法退款！\n");
+        return;
+    }
+
+    if (card_current->state == 2)
+    {
+        printf("该卡正在使用中，无法注销！\n");
+        return;
+    }
+
+    解决方法：
+    我把卡片状态和账单状态都纳入了业务判断，而不是只看单一字段。对于退款操作，程序会同时检查卡是否已注销、是否正在上机、是否存在未结算消费，只有这些条件都满足时才允许继续。对于注销操作，程序会先判断当前是否还在使用中，再要求用户输入密码并进行二次确认，避免误操作。这样处理以后，系统中的每个功能都建立在明确的状态约束上，卡片状态之间的流转关系也更加清晰。
+
+7. 上机下机时间计算、跨天处理与金额精度控制
+    难点说明：
+    下机结算不是简单地“当前时间减去登录时间”，因为登录时间被保存成字符串格式，还要考虑跨天情况。同时消费金额涉及浮点运算，如果不做处理，最后显示的金额很容易出现精度误差。因此，时间和金额的双重处理是一个很细也很容易出错的难点。
+
+    关键性代码（off_computer.c）：
+    session_seconds = (st.wHour - atoi(login_current->login_time + 11)) * 3600.0 +
+                      (st.wMinute - atoi(login_current->login_time + 14)) * 60.0 +
+                      (st.wSecond - atoi(login_current->login_time + 17));
+    if (session_seconds < 0)
+    {
+        session_seconds += 24 * 3600.0;
+    }
+    amount = session_seconds * COSTING;
+    amount = (int)(amount * 100 + 0.5) / 100.0;
+
+    解决方法：
+    我的做法是先从登录时间字符串中提取时、分、秒，再统一换算成秒数进行计算。这样避免了直接比较字符串带来的混乱。如果计算结果小于 0，则说明本次上机跨过了午夜，需要再补上 24 小时的秒数，确保时长为正值。对于金额部分，我没有直接输出浮点结果，而是在计算后手动进行四舍五入，只保留两位小数，从而减小浮点误差对结算结果的影响。这样不仅保证了计费逻辑正确，也让最终显示结果更符合实际业务需求。
+
+8. 中文 UTF-8 字符在控制台表格中的对齐问题
+    难点说明：
+    程序中有大量表格输出，而表格内容既包含英文账号，也包含中文字段名和权限说明。直接使用 `strlen` 计算字符串长度时，中文在控制台中的显示宽度通常不是 1，而是 2，这就会导致列宽计算错误，最终表格出现错位。这个问题虽然不影响功能执行，但会直接影响程序的展示效果和完整性。
+
+    关键性代码（admin_card.c）：
+    width += (ch < 0x80) ? 1 : 2;
+    char_bytes = utf8_char_byte_count(ch);
+
+    padding = content_width - text_display_width(safe_text);
+    if (padding < 0)
+    {
+        padding = 0;
+    }
+
+    解决方法：
+    为了解决中英文混排对齐问题，我没有简单使用字节长度来补空格，而是单独编写了显示宽度计算函数。对于 ASCII 字符按 1 个显示宽度处理，对于中文等 UTF-8 多字节字符按 2 个显示宽度处理，然后再根据真实显示宽度补足空格。这样做以后，管理员列表、查询结果和统计表格中的中英文内容都可以保持整齐对齐。虽然这部分不是核心业务算法，但它体现了程序在细节处理上的完整性。
+
+9. 菜单输入与数值输入的健壮性处理
+    难点说明：
+    控制台程序最常见的问题之一就是用户输入不规范，例如输入字母、空字符串、超范围数字等。如果程序直接把这些输入当作合法数据处理，就会导致菜单跳转错误，甚至让后续 `scanf` 读到残留内容。为了让程序真正可用，输入合法性处理必须足够严密。
+
+    关键性代码（main.c）：
+    static int parse_choice_in_range(const char *choice, int min, int max, int *value)
+    {
+        char *end = NULL;
+        long parsed_value;
+
+        if (choice == NULL || choice[0] == '\0')
+        {
+            return 0;
+        }
+
+        parsed_value = strtol(choice, &end, 10);
+        if (*end != '\0' || parsed_value < min || parsed_value > max)
+        {
+            return 0;
+        }
+        *value = (int)parsed_value;
+        return 1;
+    }
+
+    解决方法：
+    我没有直接用 `scanf("%d")` 作为所有菜单输入的唯一手段，而是先把输入读成字符串，再使用 `strtol` 进行转换和范围校验。这样可以明确区分“不是数字”“超出范围”“输入为空”等不同错误情况，避免把非法输入误判为合法值。对于金额等数值输入，我也增加了失败判断和输入缓冲区清理逻辑，保证一次错误输入不会影响后续流程。通过这些处理，程序在交互时会更加稳定，不容易因为一次错误输入就进入异常状态。
+
+10. 日期区间统计与营业额汇总逻辑
+    难点说明：
+    统计模块需要支持按时间段查询消费记录、统计区间营业额以及按年份统计每月营业额。难点在于消费记录是链表结构，而日期输入是分散的年、月、日，必须先统一成可比较的形式，才能进行范围筛选。如果日期比较逻辑处理不好，就会直接影响统计结果的准确性。
+
+    关键性代码（statistics.c）：
+    static int date_to_int(int year, int month, int day)
+    {
+        return year * 10000 + month * 100 + day;
+    }
+
+    start = date_to_int(sy, sm, sd);
+    end = date_to_int(ey, em, ed);
+
+    while (record_current != NULL)
+    {
+        int cur = date_to_int(record_current->year, record_current->month, record_current->day);
+        if (cur >= start && cur <= end)
+        {
+            total += record_current->amount;
+        }
+        record_current = record_current->next;
+    }
+
+    解决方法：
+    我先把用户输入的年、月、日转换成 `YYYYMMDD` 形式的整数，再把消费记录中的日期也转换成相同格式，最后用整数大小关系完成区间比较。这样做的优点是实现简单、判断直观，而且不需要额外引入复杂的时间库。对于营业额统计，则是在遍历记录链表时对满足条件的记录逐条累加金额；对于年度统计，则利用月份作为数组下标完成汇总。通过把日期统一转换后再统计，程序可以比较稳定地实现多种统计需求。
